@@ -7,7 +7,12 @@ import { IoIosRefresh } from "react-icons/io";
 
 
 const api = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: "/api",
+});
+
+const normalizeProduct = (product) => ({
+  ...product,
+  quantity: product.qty ?? product.quantity ?? 0,
 });
 
 
@@ -51,8 +56,8 @@ function App() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/products/");
-      setProducts(res.data);
+      const res = await api.get("/products");
+      setProducts(res.data.map(normalizeProduct));
       setError("");
     } catch (err) {
       setError("Failed to fetch products");
@@ -65,8 +70,8 @@ function App() {
     const run = async () => {
       setLoading(true);
       try {
-        const res = await api.get("/products/");
-        setProducts(res.data);
+        const res = await api.get("/products");
+        setProducts(res.data.map(normalizeProduct));
         setError("");
       } catch (err) {
         setError("Failed to fetch products");
@@ -141,18 +146,18 @@ function App() {
     try {
       if (editId) {
         await api.put(`/products/${editId}`, {
-          ...form,
-          id: Number(form.id),
+          name: form.name,
+          description: form.description,
           price: Number(form.price),
-          quantity: Number(form.quantity),
+          qty: Number(form.quantity),
         });
         setMessage("Product updated successfully");
       } else {
-        await api.post("/products/", {
-          ...form,
-          id: Number(form.id),
+        await api.post("/products", {
+          name: form.name,
+          description: form.description,
           price: Number(form.price),
-          quantity: Number(form.quantity),
+          qty: Number(form.quantity),
         });
         setMessage("Product created successfully");
       }
@@ -229,7 +234,7 @@ function App() {
           <div className="card form-card">
             <h2>{editId ? "Edit Product" : "Add Product"}</h2>
             <form onSubmit={handleSubmit} className="product-form">
-              <input
+              {/* <input
                 type="number"
                 name="id"
                 placeholder="ID"
@@ -237,7 +242,7 @@ function App() {
                 onChange={handleChange}
                 required
                 disabled={!!editId}
-              />
+              /> */}
               <input
                 type="text"
                 name="name"
@@ -245,6 +250,7 @@ function App() {
                 value={form.name}
                 onChange={handleChange}
                 required
+                autoComplete="off"
               />
               <input
                 type="text"
@@ -305,12 +311,15 @@ function App() {
                 <table className="product-table">
                   <thead>
                     <tr>
-                      <th 
+                      <th>
+                        ID
+                      </th>
+                      {/* <th 
                         className={`sortable ${sortField === 'id' ? `sort-${sortDirection}` : ''}`}
                         onClick={() => handleSort('id')}
                       >
                         ID
-                      </th>
+                      </th> */}
                       <th 
                         className={`sortable ${sortField === 'name' ? `sort-${sortDirection}` : ''}`}
                         onClick={() => handleSort('name')}
@@ -334,9 +343,9 @@ function App() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredProducts.map((p) => (
+                    {filteredProducts.map((p, index) => (
                       <tr key={p.id}>
-                        <td>{p.id}</td>
+                        <td>{index + 1}</td>
                         <td className="name-cell">{p.name}</td>
                         <td className="desc-cell" title={p.description}>{p.description}</td>
                         <td className="price-cell">${currency(p.price)}</td>

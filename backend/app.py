@@ -1,4 +1,5 @@
 from fastapi import FastAPI,HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
 from typing import Optional
@@ -14,9 +15,15 @@ from sqlalchemy.orm import Session
 #     await create_db_and_tables()
 #     yield
 
-
+# Create app
 app = FastAPI()
 
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["http://localhost:3000"]
+# )
+
+# Create tables defined in db_models ORM 
 db_models.Base.metadata.create_all(bind=engine)
 
 # GET ENDPOINTS
@@ -34,17 +41,19 @@ db_models.Base.metadata.create_all(bind=engine)
 #         raise HTTPException(status_code=404,detail="Class not found")
 #     return classes.get(id)
 
+
+# Root path
 @app.get("/")
 def greet():
     return {"message":"Hello from the server"}
 
+# Example data for init_db() function 
 products = [
     Product(id=13, name='iPhone 17', description='nice phone', price=799.99, qty=10),
     Product(id=14, name='iPhone 14', description='old phone', price=299.53, qty=5)
 ]
 
-#initialization of db table with example values from products list 
-#legacy approach
+#initialization of db table with example values from products list legacy approach
 # def init_db():
 #     db = session_local()
 #     stmnt = select(func.count()).select_from(db_models.Product)
@@ -56,7 +65,8 @@ products = [
 #     db.commit()
 #     db.close()
 
-#modern approach
+
+# Init db if empty with example data
 def init_db_modern():
     with session_local() as db:
         stmnt = select(func.count()).select_from(db_models.Product)
@@ -66,9 +76,10 @@ def init_db_modern():
                         for product in products
                         ])
             db.commit()
-
+            
 init_db_modern()
 
+# GET - Get session function
 def get_db():
     db = session_local()
     try:
@@ -76,7 +87,7 @@ def get_db():
     finally:
         db.close()
 
-
+# GET - Get all products
 @app.get("/products")
 def get_all_products(db: Session = Depends(get_db)): #dependency injection
     # db_products = db.query(db_models.Product).all()
@@ -87,23 +98,18 @@ def get_all_products(db: Session = Depends(get_db)): #dependency injection
     return db_products
 
 
-
-@app.get("/product/{id}")
+# GET - Get product by id
+@app.get("/products/{id}")
 def get_product_by_id(id: int,db: Session = Depends(get_db)):
-    result = db.execute(select(db_models.Product).where(db_models.Product.id == id)) #order_by(db_models.Product.price)
+    result = db.execute(select(db_models.Product).where(db_models.Product.id == id)) 
     db_products = result.scalar_one_or_none()
     if not db_products:
         raise HTTPException(status_code=404,detail="Product not found")
     return db_products
-    # for product in products:
-    #     if product.id == id:
-    #         return product
-        
-    # return "product not found"
 
 
-#add a new product
-@app.post("/product", response_model=Product)
+# POST - Add a new product
+@app.post("/products", response_model=Product)
 def add_product(product: ProductCreate, db: Session = Depends(get_db)):
     
     db_product = db_models.Product(**product.model_dump())
@@ -113,26 +119,44 @@ def add_product(product: ProductCreate, db: Session = Depends(get_db)):
     db.refresh(db_product)
     return db_product
     
-    # products.append(product)
-    # return product
     
-#update - put
-# @app.put("/product")
-# def update_product(id:int, product: ProductCreate):
-#     for i in range(len(products)):
-#         if products[i].id == id:
-#             products[i] = product
-#             return "Product updated successfully"
-#     return "product not found"
+# PUT - Update product by id
+@app.put("/products/{id}", response_model=Product)
+def update_product(id:int, product: ProductCreate, db: Session = Depends(get_db) ):
+    result = db.execute(select(db_models.Product).where(db_models.Product.id == id))
+    
+    db_product = result.scalar_one_or_none()
+    
+    if not db_product:
+        raise HTTPException(status_code=404,detail="Product not found")
+    else:
+        db_product.name = product.name
+        db_product.description = product.description
+        db_product.price = product.price
+        db_product.qty = product.qty
+        
+        db.commit()
+        db.refresh(db_product)
+        
+    return db_product
         
 
-@app.delete("/product")
-def delete_product(id: int):
-    for i in range(len(products)):
-        if products[i].id == id:
-            del products[i]
-            return "product deleted"
-    return "product not found"
+# DELETE - delete product by id 
+@app.delete("/products/{id}")
+def delete_product(id: int, db: Session = Depends(get_db)):
+    # result = db.execute(select(db_models.Product).where(db_models.Product.id == id))
+    # db_product = result.scalar_one_or_none()
+    db_product = db.get(db_models.Product, id)
+    
+    if db_product:
+        db.delete(db_product)
+        db.commit()
+        return {"message": "Product deleted successfully"}
+    else:
+        raise HTTPException(status_code=404,detail="Product not found")
+     
+    
+
     
 
 

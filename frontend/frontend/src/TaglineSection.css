@@ -1,77 +1,87 @@
 .tagline-card {
-  background: linear-gradient(135deg, rgba(255,255,255,.98), rgba(248,250,252,.96));
-  border: 1px solid rgba(255,255,255,.6);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.08);
-  padding: 24px;
-  backdrop-filter: blur(8px);
-  text-align: center;
+  height: 100%;
+  padding: 28px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(247, 250, 252, 0.78));
+  border: 1px solid var(--border);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
   position: relative;
   overflow: hidden;
 }
 
 .tagline-card::before {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2, #f59e0b);
-  border-radius: 16px 16px 0 0;
+  inset: 0;
+  background:
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.14), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 55%);
+  pointer-events: none;
+}
+
+.tagline-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  height: 100%;
+  text-align: left;
 }
 
 .tagline-content h3 {
-  margin: 0 0 12px;
-  font-size: 22px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0.5px;
+  margin: 0;
+  max-width: 20ch;
+  color: var(--text-950);
+  font-size: clamp(2rem, 3vw, 2.9rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
 }
 
 .tagline-content p {
-  margin: 0 0 20px;
-  color: #6b7280;
-  font-size: 15px;
-  line-height: 1.6;
-  max-width: 320px;
-  margin-left: auto;
-  margin-right: auto;
-  font-style: italic;
+  margin: 0;
+  max-width: 34rem;
+  color: var(--text-600);
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 .company-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  background: rgba(249,250,251,.7);
-  border: 1px solid rgba(229,231,235,.5);
-  border-radius: 12px;
-  margin: 0 auto;
-  max-width: fit-content;
-  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.06);
 }
 
 .powered-by {
-  font-size: 12px;
-  color: #9ca3af;
-  font-weight: 500;
+  font-size: 0.72rem;
+  color: var(--text-500);
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .company-name {
-  font-size: 18px;
+  color: var(--accent-strong);
+  font-size: 1rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  letter-spacing: -0.03em;
+}
+
+@media (max-width: 960px) {
+  .tagline-card {
+    padding: 24px;
+  }
+
+  .tagline-content h3 {
+    max-width: none;
+  }
 }
