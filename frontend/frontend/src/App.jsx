@@ -2,10 +2,14 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import "./App.css";
 import TaglineSection from "./TaglineSection";
+import { LuRefreshCcw } from "react-icons/lu";
+import { IoIosRefresh } from "react-icons/io";
+
 
 const api = axios.create({
   baseURL: "http://localhost:8000",
 });
+
 
 function App() {
   const [products, setProducts] = useState([]);
@@ -199,11 +203,11 @@ function App() {
       <header className="topbar">
         <div className="brand">
           <span className="brand-badge">📦</span>
-          <h1>Telusko Trac</h1>
+          <h1>Inventory Tracker</h1>
         </div>
         <div className="top-actions">
           <button className="btn btn-light" onClick={fetchProducts} disabled={loading}>
-            Refresh
+            <IoIosRefresh  className="topbar-icon"></IoIosRefresh> Refresh
           </button>
         </div>
       </header>
